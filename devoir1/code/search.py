@@ -81,17 +81,29 @@ def depthFirstSearch(problem):
 
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
-
-    print("Start:", problem.getStartState())
-    print("Is the start a goal?", problem.isGoalState(problem.getStartState()))
-    print("Start's successors:", problem.getSuccessors(problem.getStartState()))
     """
+    from game import Directions
+    from util import Stack
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
 
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 1 ICI
-    '''
+    stack = Stack()
+    current_path = []
+    current_state = problem.getStartState()
+    seen_states = []
+    while not problem.isGoalState(current_state):
+        for successor in problem.getSuccessors(current_state):
+            if successor[0] not in seen_states:
+                stack.push((successor[0], current_path + [successor[1]]))
+                seen_states.append(successor[0])
+        current_state, current_path = stack.pop()
 
-    util.raiseNotDefined()
+    return current_path
+
+
+    
 
 
 def breadthFirstSearch(problem):
@@ -102,7 +114,25 @@ def breadthFirstSearch(problem):
         INSÉREZ VOTRE SOLUTION À LA QUESTION 2 ICI
     '''
 
-    util.raiseNotDefined()
+    from game import Directions
+    from util import Stack
+    s = Directions.SOUTH
+    w = Directions.WEST
+    n = Directions.NORTH
+    e = Directions.EAST
+    
+    queue = util.Queue()
+    current_path = []
+    current_state = problem.getStartState()
+    seen_states = []
+    while not problem.isGoalState(current_state):
+        for successor in problem.getSuccessors(current_state):
+            if successor[0] not in seen_states:
+                queue.push((successor[0], current_path + [successor[1]]))
+                seen_states.append(successor[0])
+        current_state, current_path = queue.pop()
+
+    return  current_path
 
 def uniformCostSearch(problem):
     """Search the node of least total cost first."""
