@@ -94,10 +94,11 @@ def depthFirstSearch(problem):
     current_state = problem.getStartState()
     seen_states = []
     while not problem.isGoalState(current_state):
+        
+        seen_states.append(current_state)
         for successor in problem.getSuccessors(current_state):
             if successor[0] not in seen_states:
                 stack.push((successor[0], current_path + [successor[1]]))
-                seen_states.append(successor[0])
         current_state, current_path = stack.pop()
 
     return current_path
@@ -124,7 +125,7 @@ def breadthFirstSearch(problem):
     queue = util.Queue()
     current_path = []
     current_state = problem.getStartState()
-    seen_states = []
+    seen_states = [problem.getStartState()]
     while not problem.isGoalState(current_state):
         for successor in problem.getSuccessors(current_state):
             if successor[0] not in seen_states:
