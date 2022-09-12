@@ -163,9 +163,7 @@ def aStarSearch(problem, heuristic=nullHeuristic):
                 if new_state not in seen_states:
                     priority_queue.update((new_state, current_path + [action],current_cost+cost), current_cost+cost+heuristic(new_state,problem))
 
-    return  current_path
-
-
+    return  None
 
 # Abbreviations
 bfs = breadthFirstSearch
