@@ -17,7 +17,6 @@ In search.py, you will implement generic search algorithms which are called by
 Pacman agents (in searchAgents.py).
 """
 
-import queue
 import util
 
 class SearchProblem:
@@ -83,9 +82,8 @@ def depthFirstSearch(problem):
     To get started, you might want to try some of these simple commands to
     understand the search problem that is being passed in:
     """
-    from util import Stack
 
-    stack = Stack()
+    stack = util.Stack()
     current_path = []
     current_state = problem.getStartState()
     seen_states = []
@@ -95,37 +93,12 @@ def depthFirstSearch(problem):
         if problem.isGoalState(current_state):
             return current_path
         seen_states.append(current_state)
-        for successor in problem.getSuccessors(current_state):
-            if successor[0] not in seen_states:
-                stack.push((successor[0], current_path + [successor[1]]))
+        for [new_state, action, cost] in problem.getSuccessors(current_state):
+            if new_state not in seen_states:
+                stack.push((new_state, current_path + [action]))
         
 
     return None
-"""
-    from util import Stack
-
-
-    stack = Stack()
-    current_path = []
-    
-    current_state = problem.getStartState()
-    seen_states = []
-    while not problem.isGoalState(current_state):
-        
-        seen_states.append(current_state)
-        for successor in problem.getSuccessors(current_state):
-            if successor[0] not in seen_states:
-                stack.push((successor[0], current_path + [successor[1]]))
-        current_state, current_path = stack.pop()
-
-    return current_path
-
-"""
-
-
-
-    
-
 
 def breadthFirstSearch(problem):
     """Search the shallowest nodes in the search tree first."""
@@ -135,10 +108,10 @@ def breadthFirstSearch(problem):
     current_state = problem.getStartState()
     seen_states = [problem.getStartState()]
     while not problem.isGoalState(current_state):
-        for successor in problem.getSuccessors(current_state):
-            if successor[0] not in seen_states:
-                queue.push((successor[0], current_path + [successor[1]]))
-                seen_states.append(successor[0])
+        for [new_state, action, cost] in problem.getSuccessors(current_state):
+            if new_state not in seen_states:
+                queue.push((new_state, current_path + [action]))
+                seen_states.append(new_state)
         current_state, current_path = queue.pop()
 
     return  current_path
@@ -154,10 +127,10 @@ def uniformCostSearch(problem):
         
         if(current_state not in seen_states):
             seen_states.append(current_state)
-            for successor in problem.getSuccessors(current_state):
-                if successor[0] not in seen_states:
+            for [new_state, action, cost] in problem.getSuccessors(current_state):
+                if new_state not in seen_states:
 
-                    priority_queue.update((successor[0], current_path + [successor[1]],current_cost+successor[2]), current_cost+successor[2])
+                    priority_queue.update((new_state, current_path + [action],current_cost+cost), current_cost+cost)
                 
         current_state, current_path, current_cost = priority_queue.pop()
 
@@ -182,9 +155,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         
         if(current_state not in seen_states):
             seen_states.append(current_state)
-            for successor in problem.getSuccessors(current_state):
-                if successor[0] not in seen_states:
-                    priority_queue.update((successor[0], current_path + [successor[1]],current_cost+successor[2]), current_cost+successor[2]+heuristic(successor[0],problem))
+            for [new_state, action, cost] in problem.getSuccessors(current_state):
+                if new_state not in seen_states:
+                    priority_queue.update((new_state, current_path + [action],current_cost+cost), current_cost+cost+heuristic(new_state,problem))
                 
         current_state, current_path, current_cost = priority_queue.pop()
 
