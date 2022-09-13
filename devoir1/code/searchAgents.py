@@ -37,6 +37,8 @@ description for details.
 Good luck and happy searching!
 """
 
+from pydoc import doc
+from telnetlib import PRAGMA_HEARTBEAT
 from game import Directions
 from game import Agent
 from game import Actions
@@ -368,10 +370,12 @@ def cornersHeuristic(state, problem):
     walls = problem.walls # These are the walls of the maze, as a Grid (game.py)
     x, y, tokens = state
 
-    token_distance = [(abs(x - c[0]) + abs(y - c[1])) for c in corners if tokens[corners.index(c)]]
-    if not token_distance:
+    def token_distance(token):
+        return abs(x - token[0]) + abs(y - token[1])
+    token_distances = [token_distance(c) for c in corners if tokens[corners.index(c)]]
+    if not token_distances:
         return 0
-    return max(token_distance)
+    return max(token_distances)
 
 class AStarCornersAgent(SearchAgent):
     "A SearchAgent for FoodSearchProblem using A* and your foodHeuristic"
@@ -463,12 +467,31 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     Subsequent calls to this heuristic can access
     problem.heuristicInfo['wallCount']
     """
-    position, foodGrid = state
+    (x,y), foodGrid = state
+    food_positions = foodGrid.asList()
+    def is_valid_cell(x, y, map):
+        return x < map.width and x >= 0 and y < map.height and y >= 0
+    def token_heatmap(token, walls):
+        map = walls.copy()
+        step = 1
+        to_expend = [(*token, step)]
+        while to_expend:
+            x, y, step = to_expend.pop(0)
+            map[x][y] = step
+            for dx, dy in [(1, 0), (0, 1), (-1, 0), (0, -1)]:
+                nextx, nexty = x + dx, y + dy
+                if is_valid_cell(nextx, nexty, map) and map[nextx][nexty] == False:    
+                    to_expend.append((nextx, nexty, step + 1))
+        return map
+    def get_token_distance(x, y, token):
+        return problem.heuristicInfo[token][x][y]-1
 
-    '''
-        INSÉREZ VOTRE SOLUTION À LA QUESTION 7 ICI
-    '''
+    for food_position in food_positions:
+        if not problem.heuristicInfo.get(food_position):
+            problem.heuristicInfo[food_position] = token_heatmap(food_position, problem.walls)
 
-
-    return 0
+    token_distances = [get_token_distance(x, y, c) for c in food_positions]
+    if not token_distances:
+        return 0
+    return max(token_distances)
 
