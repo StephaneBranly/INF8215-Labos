@@ -87,7 +87,7 @@ def depthFirstSearch(problem):
             return current_path
 
         seen_states.append(current_state)
-        for [new_state, action, cost] in problem.getSuccessors(current_state):
+        for new_state, action, _ in problem.getSuccessors(current_state):
             if new_state not in seen_states:
                 stack.push((new_state, current_path + [action]))
 
@@ -107,7 +107,7 @@ def breadthFirstSearch(problem):
         if problem.isGoalState(current_state):
             return current_path
 
-        for [new_state, action, cost] in problem.getSuccessors(current_state):
+        for new_state, action, _ in problem.getSuccessors(current_state):
             if new_state not in seen_states:
                 queue.push((new_state, current_path + [action]))
                 seen_states.append(new_state)
@@ -130,7 +130,7 @@ def uniformCostSearch(problem):
 
         if current_state not in seen_states:
             seen_states.append(current_state)
-            for [new_state, action, cost] in problem.getSuccessors(current_state):
+            for new_state, action, cost in problem.getSuccessors(current_state):
                 if new_state not in seen_states:
                     priority_queue.update((new_state, current_path + [action],current_cost+cost), current_cost+cost)
 
@@ -157,9 +157,9 @@ def aStarSearch(problem, heuristic=nullHeuristic):
         if problem.isGoalState(current_state):
             return current_path
 
-        if(current_state not in seen_states):
+        if current_state not in seen_states:
             seen_states.append(current_state)
-            for [new_state, action, cost] in problem.getSuccessors(current_state):
+            for new_state, action, cost in problem.getSuccessors(current_state):
                 if new_state not in seen_states:
                     priority_queue.update((new_state, current_path + [action],current_cost+cost), current_cost+cost+heuristic(new_state,problem))
 

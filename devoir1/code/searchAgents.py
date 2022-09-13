@@ -302,7 +302,7 @@ class CornersProblem(search.SearchProblem):
         Returns whether this search state is a goal state of the problem.
         """
 
-        x,y,tokens = state
+        _,_,tokens = state
         return tokens.count(False) == 4
 
     def getSuccessors(self, state):
@@ -330,8 +330,8 @@ class CornersProblem(search.SearchProblem):
             nextx, nexty = int(x + dx), int(y + dy)
             if not self.walls[nextx][nexty]:
                 new_tokens = tokens.copy()
-                if (x,y) in self.corners:
-                    new_tokens[self.corners.index((x,y))] = False
+                if (nextx,nexty) in self.corners:
+                    new_tokens[self.corners.index((nextx,nexty))] = False
                 nextState = (nextx, nexty, new_tokens)
                 successors.append((nextState, action, 1))
 
