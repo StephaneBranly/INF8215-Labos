@@ -485,12 +485,17 @@ def foodHeuristic(state, problem: FoodSearchProblem):
         return map
     def get_token_distance(x, y, token):
         return problem.heuristicInfo[token][x][y]-1
+    def get_other_tokens_distance(x, y):
+        other_distances = [get_token_distance(x, y, token) for token in food_positions]
+        if not other_distances:
+            return 0
+        return max(other_distances)
 
     for food_position in food_positions:
         if not problem.heuristicInfo.get(food_position):
             problem.heuristicInfo[food_position] = token_heatmap(food_position, problem.walls)
 
-    token_distances = [get_token_distance(x, y, c) for c in food_positions]
+    token_distances = [max(get_token_distance(x, y, c),get_other_tokens_distance(*c)) for c in food_positions]
     if not token_distances:
         return 0
     return max(token_distances)
