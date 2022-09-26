@@ -472,6 +472,8 @@ def foodHeuristic(state, problem: FoodSearchProblem):
     def is_valid_cell(x, y, map):
         return x < map.width and x >= 0 and y < map.height and y >= 0
     def token_heatmap(token, walls):
+        # heatmap calculated for all cells in the map, with the distance to the token as the value
+        # the heatmap is calculated using a breadth first search
         map = walls.copy()
         step = 1
         to_expend = [(*token, step)]
@@ -483,6 +485,7 @@ def foodHeuristic(state, problem: FoodSearchProblem):
                 if is_valid_cell(nextx, nexty, map) and map[nextx][nexty] == False:    
                     to_expend.append((nextx, nexty, step + 1))
         return map
+
     def get_token_distance(x, y, token):
         return problem.heuristicInfo[token][x][y]-1
     def get_other_tokens_distance(x, y):
@@ -493,9 +496,13 @@ def foodHeuristic(state, problem: FoodSearchProblem):
 
     for food_position in food_positions:
         if not problem.heuristicInfo.get(food_position):
+            # first time we see this token, we need to calculate its heatmap
             problem.heuristicInfo[food_position] = token_heatmap(food_position, problem.walls)
 
-    token_distances = [max(get_token_distance(x, y, c),get_other_tokens_distance(*c)) for c in food_positions]
+    token_distances = [max(get_token_distance(x, y, c), get_other_tokens_distance(*c)) for c in food_positions]
+
+    # exact best distance could be computed using TSP (traveling salesman problem) algorithm,
+    # but this approach would make the use of the A* algorithm completely useless.
     if not token_distances:
         return 0
     return max(token_distances)
