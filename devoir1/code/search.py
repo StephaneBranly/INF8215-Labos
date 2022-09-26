@@ -1,3 +1,10 @@
+# Group Members :
+#
+# BRANLY Stéphane (MATRICULE 2232279)
+# GUICHARD Amaury (MATRICULE 2227083)
+#
+
+
 # search.py
 # ---------
 # Licensing Information:  You are free to use or extend these projects for
