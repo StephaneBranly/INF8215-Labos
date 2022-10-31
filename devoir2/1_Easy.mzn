@@ -21,12 +21,11 @@ var set of ATTRACTION: x;
 % Coût total
 var int: tot_cost;
 
-constraint sum(i in x, j in x)(pair_attraction[i,j]) > m;
-constraint card(x) < u;
-constraint card(x) > l;
+constraint sum(i in x, j in x where i > j)(pair_attraction[i,j]) > m;
+constraint card(x) <= u;
+constraint card(x) >= l;
 constraint tot_cost = sum(i in x)(cost[i]);
 solve minimize tot_cost;
-
 
 
 output [
