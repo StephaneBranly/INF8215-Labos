@@ -20,6 +20,40 @@ array[WORKER, PROJECT] of var 0..P: day;          % Pour chaque employé, pour c
 % Profit (gain - dépenses) a maximiser
 var int: profit;
 
+% Seulement un worker par projet par jour
+constraint forall(p in 1..P)(alldifferent(w in WORKER)(schedule[w,p]));
+
+% Chaque worker travaille sur un projet different par jour
+constraint forall(p in 2..P,w in WORKER)(schedule[w,p-1] != schedule[w,p]);
+
+% Chaque worker travaille sur un projet qu'une seule fois
+constraint forall(w in WORKER)(alldifferent(p in 1..P)(schedule[w,p]));
+
+% Link entre schedule et day
+constraint forall(p in 1..P, w in WORKER)(day[w, schedule[w,p]] == p);
+
+% Projets devant etre finis
+array[PROJECT] of var bool: projet_fini;
+constraint forall(p in PROJECT)(if count(schedule, p) == 3 then projet_fini[p] == true else projet_fini[p] == false endif);
+
+% Projets ayant des précédences
+constraint forall(p in project_with_precedences, w in 2..3)(day[precedences[p,w-1],p] < day[precedences[p,w],p]);
+
+var int: depenses;
+var int: revenus;
+
+% calcul des dépenses
+constraint sum(p in 2..P, w in WORKER)(travel_costs[schedule[w,p-1], schedule[w,p]]) = depenses;
+
+% calcul des revenus
+constraint sum(p in PROJECT where projet_fini[p] == true)(revenu[p]) = revenus;
+
+% projets devant etre faits
+constraint forall(p in project_must_be_done)(projet_fini[p] == true);
+
+constraint profit = revenus - depenses;
+
+solve maximize profit;
 output
 
 ["Horaire : \n"] 
@@ -29,6 +63,3 @@ output
 ["-----------\n"]
 ++
 ["Profit : " ++ show(profit)]
-
-
-
