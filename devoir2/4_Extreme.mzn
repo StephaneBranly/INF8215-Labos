@@ -1,3 +1,9 @@
+% Group Members :
+%
+% BRANLY Stéphane (MATRICULE 2232279)
+% GUICHARD Amaury (MATRICULE 2227083)
+%
+
 include "globals.mzn";
 
 enum PROJECT;
@@ -42,17 +48,19 @@ constraint forall(p in project_with_precedences, w in 2..3)(day[precedences[p,w-
 var int: depenses;
 var int: revenus;
 
-% calcul des dépenses
+% Calcul des dépenses
 constraint sum(p in 2..P, w in WORKER)(travel_costs[schedule[w,p-1], schedule[w,p]]) = depenses;
 
-% calcul des revenus
+% Calcul des revenus
 constraint sum(p in PROJECT where projet_fini[p] == true)(revenu[p]) = revenus;
 
-% projets devant etre faits
+% Projets devant etre faits
 constraint forall(p in project_must_be_done)(projet_fini[p] == true);
 
+% Calcul du profit
 constraint profit = revenus - depenses;
 
+% Maximisation du profit
 solve maximize profit;
 output
 

@@ -1,3 +1,9 @@
+% Group Members :
+%
+% BRANLY Stéphane (MATRICULE 2232279)
+% GUICHARD Amaury (MATRICULE 2227083)
+%
+
 include "globals.mzn";
 
 % Nombre de segments horizontaux et verticaux
@@ -24,14 +30,13 @@ array[1..h, 1..v] of var 0..m: x;
 constraint forall(i in 1..h)(sum(j in 1..v)(x[i,j])>=demand_per_h[i]);
 constraint forall(j in 1..v)(sum(i in 1..h)(x[i,j])>=demand_per_v[j]);
 
-
-
 % Le coût total
 var int: tot_cost;
 
 % Contrainte sur le coup total des constructions
 constraint sum(i in 1..h, j in 1..v where x[i,j] > 0)(x[i,j]*cost_per_house[i,j] + cost_per_permit[i,j]) = tot_cost;
 
+% Minimisation du cout total
 solve minimize tot_cost;
 
 output

@@ -1,3 +1,9 @@
+% Group Members :
+%
+% BRANLY Stéphane (MATRICULE 2232279)
+% GUICHARD Amaury (MATRICULE 2227083)
+%
+
 include "globals.mzn";
 
 int: n = 5;
@@ -14,6 +20,8 @@ constraint forall(i in 1..n)(alldifferent(j in 1..n)(x[i,j]));
 constraint forall(j in 1..n)(alldifferent(i in 1..n)(x[i,j]));
 
 % Nombre de tours visibles sur les différents axes
+% Pour chaque sous segment oeil -- tour actuelle j
+% La tour est visible si elle est la tour de taille maximale dans ce segment
 constraint forall(i in 1..n)(sum(j in 1..n)(max(x[i,1..j]) = x[i,j]) = l_r[i]); 
 constraint forall(i in 1..n)(sum(j in 1..n)(max(x[i,j..n]) = x[i,j]) = r_l[i]); 
 
