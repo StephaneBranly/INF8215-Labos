@@ -17,6 +17,7 @@ class PerceptronModel(object):
         """
         Return a Parameter instance with the current weights of the perceptron.
         """
+
         return self.w
 
     def run(self, x):
@@ -27,7 +28,8 @@ class PerceptronModel(object):
             x: a node with shape (1 x dimensions)
         Returns: a node containing a single number (the score)
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
+
+        return nn.DotProduct(self.w, x)
 
     def get_prediction(self, x):
         """
@@ -35,13 +37,22 @@ class PerceptronModel(object):
 
         Returns: 1 or -1
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
+        
+        return 1 if nn.as_scalar(self.run(x)) >= 0 else -1
 
     def train(self, dataset):
         """
         Train the perceptron until convergence.
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 1 ***"
+        
+        while True:
+            converged = True
+            for x, y in dataset.iterate_once(1):
+                if self.get_prediction(x) != nn.as_scalar(y):
+                    converged = False
+                    self.w.update(x, nn.as_scalar(y))
+            if converged:
+                break
 
 
 class RegressionModel(object):
@@ -53,7 +64,8 @@ class RegressionModel(object):
 
     def __init__(self):
         # Initialize your model parameters here
-        "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        
+        pass
 
     def run(self, x):
         """
@@ -64,7 +76,8 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+
+        pass
 
     def get_loss(self, x, y):
         """
@@ -76,13 +89,15 @@ class RegressionModel(object):
                 to be used for training
         Returns: a loss node
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        
+        return nn.SquareLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 2 ***"
+        
+        pass
 
 
 class DigitClassificationModel(object):

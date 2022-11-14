@@ -384,4 +384,5 @@ def as_scalar(node):
 
     assert isinstance(node, Node), "Input must be a node object, instead has type {!r}".format(type(node).__name__)
     assert node.data.size == 1, "Node has shape {}, cannot convert to a scalar".format(format_shape(node.data.shape))
-    return np.asscalar(node.data)
+    
+    return np.ndarray.item(node.data)
