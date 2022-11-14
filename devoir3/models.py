@@ -65,7 +65,28 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         
-        pass
+        self.hidden_layers = 1
+        self.hidden_nodes_by_layer = 50
+        self.learning_rate = 0.1
+        self.batch_size = 10
+        self.error = 0.02
+
+        self.layers = []
+        self.biaises = []
+
+        for _ in range(self.hidden_layers):
+            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
+            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
+
+        if self.hidden_layers > 0:
+            self.layers.insert(0, nn.Parameter(1, self.hidden_nodes_by_layer))
+            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 1))
+        else:
+            self.layers.insert(0, nn.Parameter(1, 1))
+            self.layers.append(nn.Parameter(1, 1))
+
+        self.biaises.append(nn.Parameter(1, 1))
+
 
     def run(self, x):
         """
@@ -76,8 +97,17 @@ class RegressionModel(object):
         Returns:
             A node with shape (batch_size x 1) containing predicted y-values
         """
+        output = x
+        print("-"*10)
+        for i in range(self.hidden_layers+2):
+            print("layer", i)
+            output = nn.ReLU(output)
+            output = nn.Linear(output, self.layers[i])
+            output = nn.AddBias(output, self.biaises[i])
+            print(output)
 
-        pass
+            
+        return output
 
     def get_loss(self, x, y):
         """
@@ -96,8 +126,15 @@ class RegressionModel(object):
         """
         Trains the model.
         """
-        
-        pass
+        for x, y in dataset.iterate_forever(self.batch_size):
+            loss = self.get_loss(x, y)
+            gradients = nn.gradients(loss, self.layers)
+            for i in range(self.hidden_layers+2):
+                self.layers[i].update(gradients[i], -self.learning_rate)
+            if nn.as_scalar(self.get_loss(x, y)) < self.error:
+                break
+
+
 
 
 class DigitClassificationModel(object):
