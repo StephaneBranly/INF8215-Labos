@@ -65,11 +65,11 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         
-        self.hidden_layers = 1
-        self.hidden_nodes_by_layer = 50
+        self.hidden_layers = 2
+        self.hidden_nodes_by_layer = 200
         self.learning_rate = 0.1
-        self.batch_size = 10
-        self.error = 0.02
+        self.batch_size = 50
+        self.error = 0.01
 
         self.layers = []
         self.biaises = []
@@ -81,9 +81,11 @@ class RegressionModel(object):
         if self.hidden_layers > 0:
             self.layers.insert(0, nn.Parameter(1, self.hidden_nodes_by_layer))
             self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 1))
+            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
         else:
             self.layers.insert(0, nn.Parameter(1, 1))
             self.layers.append(nn.Parameter(1, 1))
+            self.biaises.insert(0, nn.Parameter(1, 1))
 
         self.biaises.append(nn.Parameter(1, 1))
 
@@ -98,14 +100,13 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         output = x
-        print("-"*10)
-        for i in range(self.hidden_layers+2):
-            print("layer", i)
-            output = nn.ReLU(output)
+        for i in range(self.hidden_layers+1):
             output = nn.Linear(output, self.layers[i])
             output = nn.AddBias(output, self.biaises[i])
-            print(output)
-
+            output = nn.ReLU(output)
+        i+=1
+        output = nn.Linear(output, self.layers[i])
+        output = nn.AddBias(output, self.biaises[i])
             
         return output
 
@@ -126,15 +127,17 @@ class RegressionModel(object):
         """
         Trains the model.
         """
+
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
-            gradients = nn.gradients(loss, self.layers)
-            for i in range(self.hidden_layers+2):
-                self.layers[i].update(gradients[i], -self.learning_rate)
-            if nn.as_scalar(self.get_loss(x, y)) < self.error:
+
+            if nn.as_scalar(loss) < self.error:
                 break
 
-
+            gradients = nn.gradients(loss, self.layers + self.biaises)
+            for i in range(len(self.layers)):
+                self.layers[i].update(gradients[i], -self.learning_rate)
+                self.biaises[i].update(gradients[i+len(self.layers)], -self.learning_rate)
 
 
 class DigitClassificationModel(object):
