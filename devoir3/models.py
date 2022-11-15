@@ -157,7 +157,30 @@ class DigitClassificationModel(object):
 
     def __init__(self):
         # Initialize your model parameters here
-        "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        
+        self.hidden_layers = 5
+        self.hidden_nodes_by_layer = 100
+        self.learning_rate = 0.1
+        self.batch_size = 1000
+        self.error = 0.03
+
+        self.layers = []
+        self.biaises = []
+
+        for _ in range(self.hidden_layers):
+            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
+            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
+
+        if self.hidden_layers > 0:
+            self.layers.insert(0, nn.Parameter(784, self.hidden_nodes_by_layer))
+            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 10))
+            self.biaises.insert(0, nn.Parameter(1, self.hidden_nodes_by_layer))
+        else:
+            self.layers.insert(0, nn.Parameter(1, 784))
+            self.biaises.insert(0, nn.Parameter(1, 784))
+            self.layers.append(nn.Parameter(784, 10))
+
+        self.biaises.append(nn.Parameter(1, 10))
 
     def run(self, x):
         """
@@ -173,7 +196,16 @@ class DigitClassificationModel(object):
             A node with shape (batch_size x 10) containing predicted scores
                 (also called logits)
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        
+        output = x
+        for i in range(self.hidden_layers+1):
+            output = nn.Linear(output, self.layers[i])
+            output = nn.AddBias(output, self.biaises[i])
+            output = nn.ReLU(output)
+        i+=1
+        output = nn.Linear(output, self.layers[i])
+        output = nn.AddBias(output, self.biaises[i])
+        return output
 
     def get_loss(self, x, y):
         """
@@ -188,10 +220,21 @@ class DigitClassificationModel(object):
             y: a node with shape (batch_size x 10)
         Returns: a loss node
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        
+        return nn.SoftmaxLoss(self.run(x), y)
 
     def train(self, dataset):
         """
         Trains the model.
         """
-        "*** TODO: COMPLETE HERE FOR QUESTION 3 ***"
+        
+        for x, y in dataset.iterate_forever(self.batch_size):
+            loss = self.get_loss(x, y)
+
+            if dataset.get_validation_accuracy() > 1 - self.error:
+                break
+
+            gradients = nn.gradients(loss, self.layers + self.biaises)
+            for i in range(len(self.layers)):
+                self.layers[i].update(gradients[i], -self.learning_rate)
+                self.biaises[i].update(gradients[i+len(self.layers)], -self.learning_rate)
