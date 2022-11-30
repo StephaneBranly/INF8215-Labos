@@ -162,12 +162,13 @@ class DigitClassificationModel(object):
         
         self.hidden_layers = 2
         self.hidden_nodes_by_layer = 250
-        self.learning_rate = 0.1
-        self.batch_size = 50
+        self.learning_rate = 0.27
+        self.batch_size = 150
         self.error = 0.03
-        self.layer_sizes = [784, 300,50,25, 10]
+        self.layer_sizes = [784, 250,125,50, 10]
 
         self.layers = []
+        self.decay = 0.1
             
         self.biaises = []
 
@@ -190,7 +191,6 @@ class DigitClassificationModel(object):
             self.layers.append(nn.Parameter(784, 10))
 
         self.biaises.append(nn.Parameter(1, 10))"""
-        print(self.layers)
 
     def run(self, x):
         """
@@ -238,21 +238,24 @@ class DigitClassificationModel(object):
         Trains the model.
         """
         start = time.time()
-        ite = 1
+        ite = 0
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
+
+            print(dataset.get_validation_accuracy())
 
             if dataset.get_validation_accuracy() > 1 - self.error:
                 break
 
             if time.time() - start > 180:
                 break
-            self.learning_rate = 0.5 * math.exp(-ite*0.0025) + 0.05
-            print("Learning rate: ", self.learning_rate)
+
+            lrate = self.learning_rate #/ (1 + self.decay * ite/100)
+            #print("Learning rate: ", self.learning_rate," ite: ", ite, " lrate: ", lrate)
 
             gradients = nn.gradients(loss, self.layers + self.biaises)
             for i in range(len(self.layers)):
-                self.layers[i].update(gradients[i], -self.learning_rate)
-                self.biaises[i].update(gradients[i+len(self.layers)], -self.learning_rate)
+                self.layers[i].update(gradients[i], -lrate)
+                self.biaises[i].update(gradients[i+len(self.layers)], -lrate)
             ite +=1
             

@@ -542,9 +542,11 @@ def check_digit_classification(tracker):
 
     model.train(dataset)
 
+
     test_logits = model.run(nn.Constant(dataset.test_images)).data
     test_predicted = np.argmax(test_logits, axis=1)
     test_accuracy = np.mean(test_predicted == dataset.test_labels)
+    print("test accuraccy",test_accuracy)
 
     accuracy_threshold = 0.97
     if test_accuracy >= accuracy_threshold:
