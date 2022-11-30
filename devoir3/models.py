@@ -65,31 +65,19 @@ class RegressionModel(object):
     def __init__(self):
         # Initialize your model parameters here
         
-        self.hidden_layers = 2
-        self.hidden_nodes_by_layer = 200
+
         self.learning_rate = 0.1
         self.batch_size = 50
         self.error = 0.01
 
         self.layers = []
         self.biaises = []
+        self.layer_sizes = [1,200,200,200,1]
 
-        
+        for i in range(len(self.layer_sizes)-1):
+            self.layers.append(nn.Parameter(self.layer_sizes[i], self.layer_sizes[i+1]))
+            self.biaises.append(nn.Parameter(1, self.layer_sizes[i+1]))
 
-        for _ in range(self.hidden_layers):
-            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
-            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
-
-        if self.hidden_layers > 0:
-            self.layers.insert(0, nn.Parameter(1, self.hidden_nodes_by_layer))
-            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 1))
-            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
-        else:
-            self.layers.insert(0, nn.Parameter(1, 1))
-            self.layers.append(nn.Parameter(1, 1))
-            self.biaises.insert(0, nn.Parameter(1, 1))
-
-        self.biaises.append(nn.Parameter(1, 1))
 
 
     def run(self, x):
@@ -102,7 +90,7 @@ class RegressionModel(object):
             A node with shape (batch_size x 1) containing predicted y-values
         """
         output = x
-        for i in range(self.hidden_layers+1):
+        for i in range(len(self.layers)-1):
             output = nn.Linear(output, self.layers[i])
             output = nn.AddBias(output, self.biaises[i])
             output = nn.ReLU(output)
@@ -160,8 +148,6 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         
-        self.hidden_layers = 2
-        self.hidden_nodes_by_layer = 250
         self.learning_rate = 0.4
         self.batch_size = 1000
         self.error = 0.0275
@@ -226,7 +212,6 @@ class DigitClassificationModel(object):
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
 
-            print(dataset.get_validation_accuracy())
 
             if dataset.get_validation_accuracy() > 1 - self.error:
                 break
