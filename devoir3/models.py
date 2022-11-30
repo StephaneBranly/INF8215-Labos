@@ -162,9 +162,9 @@ class DigitClassificationModel(object):
         
         self.hidden_layers = 2
         self.hidden_nodes_by_layer = 250
-        self.learning_rate = 0.27
-        self.batch_size = 150
-        self.error = 0.03
+        self.learning_rate = 0.4
+        self.batch_size = 1000
+        self.error = 0.0275
         self.layer_sizes = [784, 250,125,50, 10]
 
         self.layers = []
@@ -176,21 +176,6 @@ class DigitClassificationModel(object):
             self.layers.append(nn.Parameter(self.layer_sizes[i], self.layer_sizes[i+1]))
             self.biaises.append(nn.Parameter(1, self.layer_sizes[i+1]))
 
-
-        """
-        for _ in range(self.hidden_layers):
-            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
-            self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
-        if self.hidden_layers > 0:
-            self.layers.insert(0, nn.Parameter(784, self.hidden_nodes_by_layer))
-            self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 10))
-            self.biaises.insert(0, nn.Parameter(1, self.hidden_nodes_by_layer))
-        else:
-            self.layers.insert(0, nn.Parameter(1, 784))
-            self.biaises.insert(0, nn.Parameter(1, 784))
-            self.layers.append(nn.Parameter(784, 10))
-
-        self.biaises.append(nn.Parameter(1, 10))"""
 
     def run(self, x):
         """
@@ -237,7 +222,6 @@ class DigitClassificationModel(object):
         """
         Trains the model.
         """
-        start = time.time()
         ite = 0
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
@@ -247,11 +231,10 @@ class DigitClassificationModel(object):
             if dataset.get_validation_accuracy() > 1 - self.error:
                 break
 
-            if time.time() - start > 180:
-                break
 
-            lrate = self.learning_rate #/ (1 + self.decay * ite/100)
-            #print("Learning rate: ", self.learning_rate," ite: ", ite, " lrate: ", lrate)
+            # le learning rate decroit au fur et a mesure des itérations
+            # idée de https://machinelearningmastery.com/understand-the-dynamics-of-learning-rate-on-deep-learning-neural-networks/
+            lrate = self.learning_rate / (1 + self.decay * ite/1000)
 
             gradients = nn.gradients(loss, self.layers + self.biaises)
             for i in range(len(self.layers)):
