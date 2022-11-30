@@ -1,3 +1,5 @@
+import math
+import time
 import nn
 
 
@@ -44,15 +46,13 @@ class PerceptronModel(object):
         """
         Train the perceptron until convergence.
         """
-        
-        while True:
+        converged = False
+        while not converged:
             converged = True
             for x, y in dataset.iterate_once(1):
                 if self.get_prediction(x) != nn.as_scalar(y):
                     converged = False
                     self.w.update(x, nn.as_scalar(y))
-            if converged:
-                break
 
 
 class RegressionModel(object):
@@ -73,6 +73,8 @@ class RegressionModel(object):
 
         self.layers = []
         self.biaises = []
+
+        
 
         for _ in range(self.hidden_layers):
             self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
@@ -159,18 +161,25 @@ class DigitClassificationModel(object):
         # Initialize your model parameters here
         
         self.hidden_layers = 2
-        self.hidden_nodes_by_layer = 200
+        self.hidden_nodes_by_layer = 250
         self.learning_rate = 0.1
-        self.batch_size = 500
+        self.batch_size = 50
         self.error = 0.03
+        self.layer_sizes = [784, 300,50,25, 10]
 
         self.layers = []
+            
         self.biaises = []
 
+        for i in range(len(self.layer_sizes)-1):
+            self.layers.append(nn.Parameter(self.layer_sizes[i], self.layer_sizes[i+1]))
+            self.biaises.append(nn.Parameter(1, self.layer_sizes[i+1]))
+
+
+        """
         for _ in range(self.hidden_layers):
             self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, self.hidden_nodes_by_layer))
             self.biaises.append(nn.Parameter(1, self.hidden_nodes_by_layer))
-
         if self.hidden_layers > 0:
             self.layers.insert(0, nn.Parameter(784, self.hidden_nodes_by_layer))
             self.layers.append(nn.Parameter(self.hidden_nodes_by_layer, 10))
@@ -180,7 +189,8 @@ class DigitClassificationModel(object):
             self.biaises.insert(0, nn.Parameter(1, 784))
             self.layers.append(nn.Parameter(784, 10))
 
-        self.biaises.append(nn.Parameter(1, 10))
+        self.biaises.append(nn.Parameter(1, 10))"""
+        print(self.layers)
 
     def run(self, x):
         """
@@ -198,7 +208,7 @@ class DigitClassificationModel(object):
         """
         
         output = x
-        for i in range(self.hidden_layers+1):
+        for i in range(len(self.layers)-1):
             output = nn.Linear(output, self.layers[i])
             output = nn.AddBias(output, self.biaises[i])
             output = nn.ReLU(output)
@@ -227,14 +237,22 @@ class DigitClassificationModel(object):
         """
         Trains the model.
         """
-        
+        start = time.time()
+        ite = 1
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
 
             if dataset.get_validation_accuracy() > 1 - self.error:
                 break
 
+            if time.time() - start > 180:
+                break
+            self.learning_rate = 0.5 * math.exp(-ite*0.0025) + 0.05
+            print("Learning rate: ", self.learning_rate)
+
             gradients = nn.gradients(loss, self.layers + self.biaises)
             for i in range(len(self.layers)):
                 self.layers[i].update(gradients[i], -self.learning_rate)
                 self.biaises[i].update(gradients[i+len(self.layers)], -self.learning_rate)
+            ite +=1
+            
