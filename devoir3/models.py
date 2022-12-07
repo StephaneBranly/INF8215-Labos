@@ -1,3 +1,10 @@
+# Group Members :
+#
+# BRANLY Stéphane (MATRICULE 2232279)
+# GUICHARD Amaury (MATRICULE 2227083)
+#
+
+
 import math
 import time
 import nn
@@ -148,9 +155,9 @@ class DigitClassificationModel(object):
     def __init__(self):
         # Initialize your model parameters here
         
-        self.learning_rate = 0.4
-        self.batch_size = 1000
-        self.error = 0.0275
+        self.learning_rate = 0.5
+        self.batch_size = 500
+        self.error = 0.0265
         self.layer_sizes = [784, 250,125,50, 10]
 
         self.layers = []
@@ -212,15 +219,12 @@ class DigitClassificationModel(object):
         for x, y in dataset.iterate_forever(self.batch_size):
             loss = self.get_loss(x, y)
 
-
             if dataset.get_validation_accuracy() > 1 - self.error:
                 break
 
-
             # le learning rate decroit au fur et a mesure des itérations
             # idée de https://machinelearningmastery.com/understand-the-dynamics-of-learning-rate-on-deep-learning-neural-networks/
-            lrate = self.learning_rate / (1 + self.decay * ite/1000)
-
+            lrate = self.learning_rate / (1 + self.decay * ite/800)
             gradients = nn.gradients(loss, self.layers + self.biaises)
             for i in range(len(self.layers)):
                 self.layers[i].update(gradients[i], -lrate)
